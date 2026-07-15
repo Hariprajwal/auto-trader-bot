@@ -1,0 +1,84 @@
+# auto_trade_bot User Configuration
+# ===================================
+# Copy this file to user.cfg and fill in your details.
+
+[auto_trade_bot_config]
+
+# ─── BROKER ────────────────────────────────────────────────────────────────────
+# Options: angel_one | zerodha | upstox | dhan | fyers
+broker = angel_one
+
+# Angel One credentials
+api_key        = YOUR_ANGEL_ONE_API_KEY
+client_id      = YOUR_CLIENT_ID
+password       = YOUR_LOGIN_PASSWORD
+totp_secret    = YOUR_TOTP_BASE32_SECRET
+
+# Zerodha credentials (if using zerodha)
+# api_key        = YOUR_ZERODHA_API_KEY
+# api_secret     = YOUR_ZERODHA_API_SECRET
+# access_token   = YOUR_DAILY_ACCESS_TOKEN   ← must refresh manually every day
+
+# Upstox credentials (if using upstox)
+# api_key        = YOUR_UPSTOX_API_KEY
+# api_secret     = YOUR_UPSTOX_API_SECRET
+# access_token   = YOUR_UPSTOX_ACCESS_TOKEN
+# redirect_uri   = http://localhost
+
+# Dhan credentials (if using dhan)
+# client_id      = YOUR_DHAN_CLIENT_ID
+# access_token   = YOUR_DHAN_ACCESS_TOKEN
+
+# Fyers credentials (if using fyers)
+# client_id      = YOUR_FYERS_CLIENT_ID
+# access_token   = YOUR_FYERS_ACCESS_TOKEN
+
+
+# ─── MARKET ────────────────────────────────────────────────────────────────────
+# Exchange: NSE | BSE | BOTH
+exchange = NSE
+
+# trade_type: intraday (auto square-off 3:20 PM) | delivery (hold overnight)
+trade_type = intraday
+
+# Market hours (IST). Bot will not trade outside these hours.
+market_open_time  = 09:15
+market_close_time = 15:20
+
+# If intraday position is at a loss near close, how much loss is OK to carry as delivery?
+# Example: 2.0 means if down less than 2%, convert to delivery instead of forced square-off
+max_loss_to_carry_delivery_pct = 2.0
+
+
+# ─── SCOUTING ──────────────────────────────────────────────────────────────────
+# How often to scout for a trade (seconds)
+scout_sleep_time = 10
+
+# Minimum gain % needed to trigger a trade (after fees)
+# Lower = more trades, higher = fewer but stronger trades
+# Recommended for Indian stocks: 0.3 to 1.0
+scout_margin = 0.5
+
+# use_margin: yes = margin mode (scout_margin acts as % threshold)
+#             no  = multiplier mode (classic binance-bot mode)
+use_margin = yes
+
+# Scout multiplier (only used if use_margin = no)
+scout_multiplier = 5
+
+# Keep scout history for this many hours (for DB cleanup)
+hour_to_keep_scout_history = 1
+
+
+# ─── ORDERS ────────────────────────────────────────────────────────────────────
+# How long to wait for an order to fill before cancelling (seconds)
+sell_timeout = 30
+buy_timeout  = 30
+
+
+# ─── STRATEGY ──────────────────────────────────────────────────────────────────
+strategy = default
+
+# Which stock to hold when the bot starts for the first time.
+# Leave empty to pick randomly from supported_stock_list.
+# current_stock = RELIANCE

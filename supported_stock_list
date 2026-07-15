@@ -1,0 +1,32 @@
+# Supported Stock List for auto_trade_bot
+# =========================================
+# One NSE symbol per line.
+# Comments start with #
+# These are the stocks the bot will rotate between.
+#
+# Recommendation: Use large-cap, highly liquid NSE stocks.
+# Avoid low-volume stocks — wide bid-ask spreads hurt the ratio strategy.
+
+# ── Nifty 50 Large Caps (recommended for beginners) ──
+RELIANCE
+TCS
+INFY
+HDFCBANK
+ICICIBANK
+SBIN
+WIPRO
+AXISBANK
+HCLTECH
+LT
+
+# ── Optional: Mid-cap additions ──
+# ADANIENT
+# ADANIPORTS
+# BAJFINANCE
+# MARUTI
+# SUNPHARMA
+# TATAMOTORS
+# TITAN
+# ULTRACEMCO
+# NESTLEIND
+# POWERGRID
