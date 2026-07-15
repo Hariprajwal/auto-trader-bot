@@ -13,6 +13,7 @@ from .config import Config
 from .database import Database
 from .logger import Logger
 from .models import Stock, StockValue, Pair
+from .models.stock_value import Interval
 
 
 class AutoTrader:
@@ -321,7 +322,7 @@ class AutoTrader:
 
             self.db.log_scout(pair, pair.ratio, stock_price, other_price)
 
-            # core ratio calculation (same math as the crypto bot)
+            # Ratio score: how much better is the target stock vs current, after fees?
             stock_opt_ratio = stock_price / other_price
             fee = self.broker.get_effective_fee_pct(self.config.TRADE_TYPE)
             transaction_fee = fee * 2  # buy + sell side
@@ -376,5 +377,11 @@ class AutoTrader:
                 if qty == 0:
                     continue
                 inr_price = self.get_stock_price(stock.symbol)
-                sv = StockValue(stock, qty, inr_price, datetime=now)
+                sv = StockValue(
+                    stock=stock,
+                    balance=qty,
+                    inr_value=inr_price,
+                    interval=Interval.MINUTELY,
+                    datetime=now,
+                )
                 session.add(sv)
