@@ -8,7 +8,7 @@
 [auto_trade_bot_config]
 
 # ─── BROKER ────────────────────────────────────────────────────────────────────
-# Options: angel_one | zerodha | upstox | dhan | fyers
+# Options: angel_one | zerodha | upstox | dhan | fyers | groww
 broker = angel_one
 
 # Angel One credentials
@@ -36,6 +36,12 @@ totp_secret    = YOUR_TOTP_BASE32_SECRET
 # client_id      = YOUR_FYERS_CLIENT_ID
 # access_token   = YOUR_FYERS_ACCESS_TOKEN
 
+# Groww Pro credentials (if using groww)
+# Note: Groww charges ZERO brokerage on delivery — cheapest for CNC trading!
+# Get your API access from: https://groww.in/trading-api
+# client_id      = YOUR_GROWW_CLIENT_ID
+# access_token   = YOUR_GROWW_ACCESS_TOKEN
+
 
 # ─── MARKET ────────────────────────────────────────────────────────────────────
 # Exchange: NSE | BSE | BOTH
@@ -60,13 +66,17 @@ scout_sleep_time = 10
 # Minimum gain % needed to trigger a trade.
 # This MUST exceed your total round-trip brokerage cost to be profitable.
 #
-#  Intraday (MIS) fee breakdown (round-trip ~0.13%):
+#  Intraday (MIS) fee breakdown — ALL brokers (round-trip ~0.13%):
 #    Brokerage ₹20/order + STT 0.025% sell + NSE 0.007% + GST + SEBI + Stamp
 #    → Set scout_margin >= 0.3  (leaves ~0.17% profit per trade)
 #
-#  Delivery (CNC) fee breakdown (round-trip ~0.32%):
+#  Delivery (CNC) fee breakdown — Angel One / Zerodha / Upstox / Dhan / Fyers (round-trip ~0.32%):
 #    Brokerage ₹20/order + STT 0.1% BOTH sides + NSE + GST + SEBI + Stamp
 #    → Set scout_margin >= 0.8  (leaves ~0.48% profit per trade)
+#
+#  Delivery (CNC) fee breakdown — GROWW only (round-trip ~0.21%  ← cheaper!):
+#    Brokerage ZERO ✅ + STT 0.1% BOTH sides + NSE + GST + SEBI + Stamp
+#    → Set scout_margin >= 0.5  (leaves ~0.29% profit per trade)
 #
 scout_margin = 0.3
 

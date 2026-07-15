@@ -75,6 +75,7 @@ The strategy exploits **relative momentum**: if `RELIANCE` has moved up 1% while
 | **Upstox** | `upstox-python-sdk` | ⚠️ Partial | Good websocket support |
 | **Dhan** | `dhanhq` | ✅ Token-based | Simple REST, great for beginners |
 | **Fyers** | `fyers-apiv3` | ⚠️ Partial | Best for intraday execution speed |
+| **Groww** | `requests` (REST) | ✅ Token-based | **Zero brokerage on delivery** — cheapest for CNC trades |
 
 ---
 
@@ -101,6 +102,8 @@ Unlike international markets, Indian brokerage involves multiple regulatory char
 
 ### Delivery (CNC) — Per Trade Round-Trip
 
+**Standard brokers (Angel One, Zerodha, Upstox, Dhan, Fyers):**
+
 | Charge | Calculation | Approx % (₹50k trade) |
 |---|---|---|
 | Brokerage | ₹20 flat per order | ~0.04% per side |
@@ -111,8 +114,21 @@ Unlike international markets, Indian brokerage involves multiple regulatory char
 | Stamp Duty | 0.015% on buy side | 0.015% (one-time) |
 | **Total Round-Trip** | | **≈ 0.32%** |
 
-> ✅ **Recommended `scout_margin` for delivery: `0.8%`**
-> This gives you ~0.48% profit per trade after all fees.
+> ✅ **Recommended `scout_margin` for delivery (standard brokers): `0.8%`**
+
+**Groww (zero brokerage on delivery):**
+
+| Charge | Calculation | Approx % (₹50k trade) |
+|---|---|---|
+| Brokerage | **₹0 — FREE** ✅ | 0% |
+| STT | **0.1% on BOTH sides** | **0.2% total** |
+| NSE Exchange | 0.00345% per side | 0.007% |
+| GST (18%) | On exchange charges only | ~0.001% |
+| SEBI | 0.0001% per side | 0.0002% |
+| Stamp Duty | 0.015% on buy side | 0.015% (one-time) |
+| **Total Round-Trip** | | **≈ 0.21%** |
+
+> ✅ **Recommended `scout_margin` for Groww delivery: `0.5%`** (cheaper than others!)
 
 ---
 
@@ -151,6 +167,7 @@ pip install smartapi-python pyotp    # Angel One (recommended)
 # pip install upstox-python-sdk       # Upstox
 # pip install dhanhq                  # Dhan
 # pip install fyers-apiv3             # Fyers
+# pip install requests                # Groww (already included in requirements.txt)
 ```
 
 ### 2. Configure your broker

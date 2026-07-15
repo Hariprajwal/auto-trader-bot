@@ -2,6 +2,7 @@
 sqlalchemy>=1.4
 schedule>=1.2
 pyotp>=2.9
+requests>=2.31      # Used by Groww broker (REST API)
 
 # Backtesting (open source, free NSE/BSE data)
 yfinance>=0.2.40

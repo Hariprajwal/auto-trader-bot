@@ -9,12 +9,13 @@ from .zerodha_broker import ZerodhaBroker
 from .upstox_broker import UpstoxBroker
 from .dhan_broker import DhanBroker
 from .fyers_broker import FyersBroker
+from .groww_broker import GrowwBroker
 
 
 def get_broker(broker_name: str, config, logger=None) -> BaseBroker:
     """
     Instantiate and return the correct broker implementation.
-    broker_name: "angel_one" | "zerodha" | "upstox" | "dhan" | "fyers"
+    broker_name: "angel_one" | "zerodha" | "upstox" | "dhan" | "fyers" | "groww"
     """
     name = broker_name.lower().strip().replace(" ", "_").replace("-", "_")
 
@@ -53,10 +54,16 @@ def get_broker(broker_name: str, config, logger=None) -> BaseBroker:
             access_token=config.BROKER_ACCESS_TOKEN,
             logger=logger,
         )
+    elif name == "groww":
+        return GrowwBroker(
+            client_id=config.BROKER_CLIENT_ID,
+            access_token=config.BROKER_ACCESS_TOKEN,
+            logger=logger,
+        )
     else:
         raise ValueError(
             f"Unknown broker '{broker_name}'. "
-            f"Valid options: angel_one, zerodha, upstox, dhan, fyers"
+            f"Valid options: angel_one, zerodha, upstox, dhan, fyers, groww"
         )
 
 
