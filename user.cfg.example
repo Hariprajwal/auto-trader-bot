@@ -1,6 +1,9 @@
-# auto_trade_bot User Configuration
-# ===================================
-# Copy this file to user.cfg and fill in your details.
+# auto_trade_bot — User Configuration
+# ==========================================
+# Author  : K R HARI PRAJWAL
+# License : MIT
+#
+# Copy this file to user.cfg and fill in your credentials.
 
 [auto_trade_bot_config]
 
@@ -50,17 +53,25 @@ market_close_time = 15:20
 max_loss_to_carry_delivery_pct = 2.0
 
 
-# ─── SCOUTING ──────────────────────────────────────────────────────────────────
-# How often to scout for a trade (seconds)
+# ─── SCOUTING & FEES ───────────────────────────────────────────────────────────
+# How often to scan for a trade (seconds). Lower = faster reaction, more API calls.
 scout_sleep_time = 10
 
-# Minimum gain % needed to trigger a trade (after fees)
-# Lower = more trades, higher = fewer but stronger trades
-# Recommended for Indian stocks: 0.3 to 1.0
-scout_margin = 0.5
+# Minimum gain % needed to trigger a trade.
+# This MUST exceed your total round-trip brokerage cost to be profitable.
+#
+#  Intraday (MIS) fee breakdown (round-trip ~0.13%):
+#    Brokerage ₹20/order + STT 0.025% sell + NSE 0.007% + GST + SEBI + Stamp
+#    → Set scout_margin >= 0.3  (leaves ~0.17% profit per trade)
+#
+#  Delivery (CNC) fee breakdown (round-trip ~0.32%):
+#    Brokerage ₹20/order + STT 0.1% BOTH sides + NSE + GST + SEBI + Stamp
+#    → Set scout_margin >= 0.8  (leaves ~0.48% profit per trade)
+#
+scout_margin = 0.3
 
-# use_margin: yes = margin mode (scout_margin acts as % threshold)
-#             no  = multiplier mode (classic binance-bot mode)
+# use_margin: yes = scout_margin acts as direct % threshold (recommended)
+#             no  = multiplier mode (advanced)
 use_margin = yes
 
 # Scout multiplier (only used if use_margin = no)

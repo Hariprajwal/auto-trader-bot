@@ -110,15 +110,33 @@ class BaseBroker(ABC):
 
     def get_effective_fee_pct(self, trade_type: str = "INTRADAY") -> float:
         """
-        Returns the total effective fee percentage for a trade.
-        Includes brokerage, STT, GST, exchange charges, SEBI fees.
-        
-        Typical values (approximate):
-          - Intraday (MIS): ~0.05% per side
-          - Delivery (CNC): ~0.15% per side (STT higher)
-        
-        Override in subclass if your broker has different charges.
+        Returns the total effective fee percentage for ONE SIDE of a trade.
+        The auto_trader doubles this for the round-trip calculation.
+
+        Indian Intraday (MIS) — per side approximate breakdown:
+          Brokerage (₹20 flat on ₹50k)  ≈ 0.040%
+          STT (sell side only)            = 0.025% (only on sell, ~0.0125% averaged)
+          NSE Exchange charges            = 0.003%
+          GST on brokerage+exchange       ≈ 0.008%
+          SEBI charges                    = 0.0001%
+          Stamp duty (buy side only)      = 0.003% (averaged ≈ 0.0015%)
+          ─────────────────────────────────────────
+          Per-side total ≈ 0.065%  →  round-trip ≈ 0.13%
+
+        Indian Delivery (CNC) — per side approximate breakdown:
+          Brokerage (₹20 flat on ₹50k)  ≈ 0.040%
+          STT (both sides)               = 0.100%   ← largest cost!
+          NSE Exchange charges           = 0.003%
+          GST on brokerage+exchange      ≈ 0.008%
+          SEBI charges                   = 0.0001%
+          Stamp duty (buy side)          = 0.015% (averaged ≈ 0.0075%)
+          ─────────────────────────────────────────
+          Per-side total ≈ 0.158%  →  round-trip ≈ 0.32%
+
+        Note: scout_margin should comfortably exceed the round-trip fee.
+          Recommended intraday  scout_margin: 0.3%
+          Recommended delivery  scout_margin: 0.8%
         """
         if trade_type.upper() in ("INTRADAY", "MIS"):
-            return 0.0005  # 0.05%
-        return 0.0015  # 0.15% delivery
+            return 0.00065   # 0.065% per side → 0.13% round-trip
+        return 0.00158       # 0.158% per side → 0.32% round-trip

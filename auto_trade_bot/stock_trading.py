@@ -10,9 +10,8 @@ from .strategies import get_strategy
 
 def main():
     logger = Logger()
-    logger.info("=" * 60)
-    logger.info("  auto_trade_bot — Indian Stock Market Trading Bot")
-    logger.info("=" * 60)
+    logger.banner()
+    logger.info("Starting auto_trade_bot...")
 
     config = Config()
     db = Database(logger, config)

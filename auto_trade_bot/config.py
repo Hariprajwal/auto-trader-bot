@@ -1,3 +1,32 @@
+# ─────────────────────────────────────────────────────────────────────────────
+#  auto_trade_bot — Configuration
+#  Author  : K R HARI PRAJWAL
+#  License : MIT
+#
+#  Indian Brokerage Fee Reference (used to calibrate scout_margin):
+#
+#  INTRADAY (MIS) — round-trip cost breakdown:
+#    Brokerage       ₹20 flat/order  → ~0.04% each side on ₹50k trade
+#    STT             0.025% on SELL side only
+#    Exchange (NSE)  0.00345% per side
+#    GST (18%)       on brokerage + exchange charges
+#    SEBI            0.0001% per side
+#    Stamp duty      0.003% on BUY side
+#    ─────────────────────────────────────────────
+#    Total round-trip ≈ 0.13%
+#    Recommended scout_margin: 0.3%  (covers fees + ~0.17% profit target)
+#
+#  DELIVERY (CNC) — round-trip cost breakdown:
+#    Brokerage       ₹20 flat/order  → ~0.04% each side
+#    STT             0.1% on BOTH buy AND sell = 0.2% total  ← big cost!
+#    Exchange (NSE)  0.00345% per side
+#    GST (18%)       on brokerage + exchange charges
+#    SEBI            0.0001% per side
+#    Stamp duty      0.015% on BUY side
+#    ─────────────────────────────────────────────
+#    Total round-trip ≈ 0.32%
+#    Recommended scout_margin: 0.8%  (covers fees + ~0.48% profit target)
+# ─────────────────────────────────────────────────────────────────────────────
 import configparser
 import os
 
@@ -15,7 +44,8 @@ class Config:
             "bridge": "INR",
             "use_margin": "yes",
             "scout_multiplier": "5",
-            "scout_margin": "0.5",
+            # 0.3 for intraday (round-trip fee ~0.13%), 0.8 for delivery (round-trip fee ~0.32%)
+            "scout_margin": "0.3",
             "scout_sleep_time": "10",
             "hour_to_keep_scout_history": "1",
             "strategy": "default",

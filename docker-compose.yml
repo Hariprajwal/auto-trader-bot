@@ -1,0 +1,60 @@
+version: "3.9"
+
+services:
+  auto_trade_bot:
+    build: .
+    container_name: auto_trade_bot
+    restart: unless-stopped          # Auto-restarts on crash, stops on manual stop
+
+    # ── Mount your user.cfg and stock list into the container ────────────────
+    volumes:
+      - ./user.cfg:/app/user.cfg:ro          # Read-only — your credentials
+      - ./supported_stock_list:/app/supported_stock_list:ro
+      - bot_data:/app/data                   # SQLite DB — persisted
+      - bot_logs:/app/logs                   # Log files — persisted
+      - bot_results:/app/backtest_results    # Backtest outputs — persisted
+      - ./trade_history.json:/app/trade_history.json  # Trade log — persisted
+
+    # ── Optional: override config via environment variables ──────────────────
+    # (you can use this instead of user.cfg if you prefer)
+    environment:
+      - PYTHONUNBUFFERED=1   # Makes logs appear immediately in docker logs
+      # Uncomment and fill if not using user.cfg:
+      # - BROKER=angel_one
+      # - BROKER_API_KEY=your_key
+      # - BROKER_CLIENT_ID=your_client_id
+      # - BROKER_PASSWORD=your_password
+      # - BROKER_TOTP_SECRET=your_totp_secret
+      # - EXCHANGE=NSE
+      # - TRADE_TYPE=INTRADAY
+      # - SCOUT_MARGIN=0.3
+
+    # ── Logging ──────────────────────────────────────────────────────────────
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  # ── Optional: run a backtest (one-shot service) ──────────────────────────────
+  backtest:
+    build: .
+    container_name: auto_trade_bot_backtest
+    profiles: ["backtest"]           # Only runs when: docker compose --profile backtest up
+    volumes:
+      - ./supported_stock_list:/app/supported_stock_list:ro
+      - bot_results:/app/backtest_results
+    environment:
+      - PYTHONUNBUFFERED=1
+    command: >
+      python -m auto_trade_bot backtest
+        --start 2024-01-01
+        --end   2024-12-31
+        --capital 100000
+        --scout-margin 0.3
+        --save
+
+volumes:
+  bot_data:
+  bot_logs:
+  bot_results:
