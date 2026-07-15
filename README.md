@@ -20,6 +20,7 @@
 ## 📖 Table of Contents
 
 - [How It Works](#-how-it-works)
+- [Real Example with ₹1,00,000](#-how-it-works--real-example-with-100000)
 - [Key Features](#-key-features)
 - [Supported Brokers](#-supported-brokers)
 - [Indian Brokerage Fees Explained](#-indian-brokerage-fees--scout-margin-guide)
@@ -30,7 +31,7 @@
 - [Project Structure](#-project-structure)
 - [Smart Square-Off Logic](#-smart-square-off-logic)
 - [FAQ](#-faq)
-- [Disclaimer](#-disclaimer)
+- [Disclaimer & Author's Note](#%EF%B8%8F-disclaimer--authors-note)
 
 ---
 
@@ -46,6 +47,105 @@ The bot operates on a **continuous ratio-rotation strategy**:
 > **INR (cash) is the bridge currency** — you're never just sitting idle in cash. You always hold whichever stock is performing best relative to the others.
 
 The strategy exploits **relative momentum**: if `RELIANCE` has moved up 1% while you're holding `TCS` which has been flat, the bot captures that divergence before the gap closes.
+
+---
+
+## 💡 How It Works — Real Example with ₹1,00,000
+
+*Author's note — K R HARI PRAJWAL*
+
+> [!IMPORTANT]
+> **Minimum capital matters.** With only ₹1,300 (1 share of TCS), Angel One charges ₹20 flat brokerage = **1.5% per trade** — that kills any profit before you even start. You need at minimum **₹20,000–₹50,000** for the ₹20 flat fee to become small enough (~0.04%). The strategy only makes sense at reasonable capital.
+
+### Recommended Capital vs Fee Impact
+
+| Capital | Shares of TCS @₹1,300 | Brokerage per side | Effective fee % |
+|---|---|---|---|
+| ₹1,300 | 1 share | ₹20 | **1.54%** ← way too high |
+| ₹10,000 | 7 shares | ₹20 | **0.20%** ← borderline |
+| ₹50,000 | 38 shares | ₹20 | **0.04%** ← good |
+| **₹1,00,000** | **76 shares** | ₹20 | **0.02%** ← ideal |
+
+At ₹1,00,000: total round-trip fees ≈ ₹100 → profit per trade ≈ ₹700+ at 0.8% scout margin.
+
+---
+
+### Step-by-step walkthrough
+
+**Startup** — Bot connects to Angel One via API and buys an initial stock:
+```
+Capital: ₹1,00,000
+Buy 76 shares TCS @ ₹1,300 = ₹98,800  (placed as LIMIT order via API)
+Leftover INR: ₹1,200 sits as cash
+
+Stored ratios in DB:
+  TCS / RELIANCE  = 1300 / 2800 = 0.4643
+  TCS / INFY      = 1300 / 1600 = 0.8125
+  TCS / SBIN      = 1300 /  800 = 1.6250
+  TCS / HDFCBANK  = 1300 / 1700 = 0.7647
+```
+
+Every order the bot places **appears in your Angel One app** exactly like a manual trade — you can see it in your order book, holdings, and P&L.
+
+**Every 10 seconds — bot prints live ratio distances (both + and -):**
+```
+=== Live Stock Distance to Target ===
+      RELIANCE :  -0.48%  (Target: >0.80%)   ← not yet
+          INFY :  -0.62%  (Target: >0.80%)   ← not yet
+          SBIN :  -0.21%  (Target: >0.80%)   ← not yet
+      HDFCBANK :  -0.71%  (Target: >0.80%)   ← not yet
+=====================================
+```
+Negative = how far each stock still needs to move before a trade triggers.
+Positive = trade fires immediately.
+
+**3 days later — RELIANCE drops from ₹2,800 to ₹2,700 while TCS stays at ₹1,300:**
+```
+TCS / RELIANCE current = 1300 / 2700 = 0.4815
+TCS / RELIANCE stored  =               0.4643
+
+Score = (0.4815 / 0.4643) - 1 - fees(0.316%) - scout_margin(0.8%)
+      = +2.58%  ← POSITIVE → TRADE FIRES ✅
+
+=== Live Stock Distance to Target ===
+      RELIANCE : +2.58%  (Target: >0.80%)   ← TRADING NOW!
+          INFY :  -0.31%
+          SBIN :  -0.44%
+      HDFCBANK :  -0.29%
+=====================================
+```
+
+**Trade executes automatically:**
+```
+SELL: 76 TCS @ ₹1,300
+  Gross          = ₹98,800
+  Brokerage      =    -₹20.00
+  STT (sell)     =    -₹24.70   (0.025% × ₹98,800)
+  NSE charges    =     -₹3.41
+  GST + SEBI     =     -₹4.67
+  Stamp duty     =     -₹2.96
+  ─────────────────────────────
+  Net INR recv'd = ₹98,744
+
+BUY: 36 shares RELIANCE @ ₹2,700 = ₹97,200  (+buy fees ≈ ₹44)
+  Leftover cash: ₹1,500
+```
+
+**How profit happens — two scenarios:**
+
+*Scenario A — RELIANCE bounces back to ₹2,800:*
+```
+36 shares × ₹2,800 = ₹1,00,800
+Profit = ₹1,000+ in a few days ✅
+```
+
+*Scenario B — Neither stock moves, but INFY drops next week:*
+```
+Bot detects INFY divergence vs RELIANCE → sells RELIANCE → buys INFY
+Each swap captures relative divergence. Gains stack over time. ✅
+```
+
+> **The key insight:** You don't need a stock to "recover." The bot profits by being in the *relatively stronger* stock at each point in time. Every swap is a small, fee-covered gain.
 
 ---
 
@@ -493,11 +593,47 @@ auto-trader-bot/
 
 ---
 
-## ⚠️ Disclaimer
+## ⚠️ Disclaimer & Author's Note
 
-> This software is provided for **educational and research purposes only**. It is **not financial advice**. Algorithmic trading involves significant risk including total loss of capital. Past backtest results do not guarantee future performance. Always test thoroughly with small capital before scaling up. The author (K R HARI PRAJWAL) is not responsible for any trading losses incurred through the use of this software.
->
-> **Trade at your own risk.**
+> [!CAUTION]
+> **IMPORTANT — Please read before using this software.**
+
+### Legal Disclaimer
+
+This software is provided for **educational and research purposes only**.
+
+- It is **NOT financial advice** of any kind
+- Algorithmic trading involves **significant risk**, including the **total loss of your invested capital**
+- Past backtest results do **not** guarantee future performance — markets change
+- The strategy may underperform or lose money in certain market conditions (e.g. trending markets where one stock keeps falling and no divergence occurs)
+- **SEBI regulations** apply to all automated trading activity in India — ensure you comply with your broker's API terms of service
+
+The author **K R HARI PRAJWAL** is not responsible for any trading losses, missed opportunities, technical failures, or broker-related issues incurred through the use of this software.
+
+**Trade entirely at your own risk.**
+
+---
+
+### Author's Personal Recommendations — K R HARI PRAJWAL
+
+Based on the design and fee structure of this bot, here is what I personally recommend:
+
+> [!TIP]
+> **Start small. Backtest first. Scale slowly.**
+
+1. **Minimum capital: ₹50,000** — Below this, the ₹20 flat brokerage per order eats too large a percentage of your trade value. At ₹50,000 the fee is ~0.04% per side. At ₹1,00,000 it's ~0.02%.
+
+2. **Run backtest before going live** — Use `python -m auto_trade_bot backtest` with your exact stock list and scout_margin. See how it would have performed over the past year before risking real money.
+
+3. **Use delivery mode (the default)** — Don't day-trade with this bot unless you specifically understand intraday square-off rules. Delivery mode lets the strategy play out naturally without time pressure.
+
+4. **Use liquid, large-cap NSE stocks** — Nifty 50 stocks (RELIANCE, TCS, INFY, HDFCBANK, etc.) have tight bid-ask spreads. Mid-cap and small-cap stocks have wider spreads that hurt the ratio strategy.
+
+5. **Don't set scout_margin too low** — `0.8%` for delivery is the minimum recommended. Going lower increases trade frequency but reduces per-trade profit, and small price fluctuations may trigger unnecessary trades.
+
+6. **Monitor the first week** — Watch the logs and `trade_history.json` to make sure trades are executing as expected. Check the "Live Stock Distance to Target" printout — you should see negative values most of the time, with occasional positive values triggering trades.
+
+7. **The bot is not a get-rich-quick scheme** — It is a systematic, disciplined capital rotation engine. Returns are modest but consistent over time when the strategy works well.
 
 ---
 
@@ -505,6 +641,9 @@ auto-trader-bot/
 
 Made with ❤️ by **K R HARI PRAJWAL**
 
-[MIT License](LICENSE)
+[MIT License](LICENSE) · [GitHub](https://github.com/Hariprajwal/auto-trader-bot)
+
+*"Be systematic. Be patient. Let the ratios work."*
+*— K R HARI PRAJWAL*
 
 </div>
