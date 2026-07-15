@@ -24,7 +24,8 @@ IF NOT EXIST "user.cfg" (
 )
 
 IF "%1"=="backtest" (
-    echo [BACKTEST] Running backtest...
+    echo [BACKTEST] Running backtest ^(delivery mode, scout_margin=0.8^)...
+    echo [INFO] For intraday simulation: run.bat backtest --scout-margin 0.3 --fee 0.00065
     .venv\Scripts\python -m auto_trade_bot backtest %2 %3 %4 %5 %6 %7 %8 %9
 ) ELSE (
     echo [START] Starting bot...

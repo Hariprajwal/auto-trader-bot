@@ -292,8 +292,8 @@ All settings go in `user.cfg` under `[auto_trade_bot_config]`.
 | Key | Default | Description |
 |---|---|---|
 | `exchange` | `NSE` | `NSE`, `BSE` |
-| `trade_type` | `intraday` | `intraday` (auto square-off) or `delivery` |
-| `scout_margin` | `0.3` | Min % gain to trigger a trade. **0.3 for intraday, 0.8 for delivery** |
+| `trade_type` | `delivery` | **`delivery`** (hold indefinitely, recommended) or `intraday` (day trading, must square off 3:20 PM) |
+| `scout_margin` | `0.8` | Min % gain to trigger a trade. **0.8 for delivery, 0.5 for Groww delivery, 0.3 for intraday** |
 | `scout_sleep_time` | `10` | Seconds between each price scan |
 | `use_margin` | `yes` | `yes` = margin mode (scout_margin as %), `no` = multiplier mode |
 | `scout_multiplier` | `5` | Only used when `use_margin = no` |
@@ -338,9 +338,16 @@ python -m auto_trade_bot backtest \
   --start  2023-01-01 \
   --end    2024-12-31 \
   --capital 100000 \
-  --scout-margin 0.3 \
+  --scout-margin 0.8 \
   --exchange NSE \
   --interval 1d \
+  --save
+
+# Simulate intraday mode:
+python -m auto_trade_bot backtest \
+  --stocks RELIANCE,TCS,INFY \
+  --scout-margin 0.3 \
+  --fee 0.00065 \
   --save
 ```
 
@@ -354,8 +361,8 @@ python -m auto_trade_bot backtest \
 | `--capital` | `100000` | Starting capital in INR |
 | `--exchange` | `NSE` | `NSE` or `BSE` |
 | `--interval` | `1d` | `1d` daily, `1h` hourly, `5m` five-minute (max 60 days) |
-| `--scout-margin` | `0.3` | Scout margin % to test |
-| `--fee` | `0.00065` | Per-side fee as decimal |
+| `--scout-margin` | `0.8` | Scout margin %. **0.8 delivery (default), 0.5 Groww delivery, 0.3 intraday** |
+| `--fee` | `0.00158` | Per-side fee as decimal. **0.00158 delivery (default), 0.00065 intraday** |
 | `--save` | Off | Save full trade + portfolio JSON to `backtest_results/` |
 | `--initial-stock` | First in list | Which stock to hold at the start |
 

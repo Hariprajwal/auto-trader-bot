@@ -47,8 +47,13 @@ totp_secret    = YOUR_TOTP_BASE32_SECRET
 # Exchange: NSE | BSE | BOTH
 exchange = NSE
 
-# trade_type: intraday (auto square-off 3:20 PM) | delivery (hold overnight)
-trade_type = intraday
+# trade_type:
+#   delivery  (CNC) ← DEFAULT — hold indefinitely, no time pressure
+#                              swap only when ratio improves enough
+#                              this is the correct mode for this strategy
+#   intraday  (MIS) — must square off by 3:20 PM every day
+#                      only use if you specifically want day trading
+trade_type = delivery
 
 # Market hours (IST). Bot will not trade outside these hours.
 market_open_time  = 09:15
@@ -66,19 +71,22 @@ scout_sleep_time = 10
 # Minimum gain % needed to trigger a trade.
 # This MUST exceed your total round-trip brokerage cost to be profitable.
 #
-#  Intraday (MIS) fee breakdown — ALL brokers (round-trip ~0.13%):
-#    Brokerage ₹20/order + STT 0.025% sell + NSE 0.007% + GST + SEBI + Stamp
-#    → Set scout_margin >= 0.3  (leaves ~0.17% profit per trade)
-#
-#  Delivery (CNC) fee breakdown — Angel One / Zerodha / Upstox / Dhan / Fyers (round-trip ~0.32%):
+#  Delivery (CNC) fee breakdown — Angel One / Zerodha / Upstox / Dhan / Fyers:
 #    Brokerage ₹20/order + STT 0.1% BOTH sides + NSE + GST + SEBI + Stamp
-#    → Set scout_margin >= 0.8  (leaves ~0.48% profit per trade)
+#    Round-trip ≈ 0.32%
+#    → Set scout_margin >= 0.8  (leaves ~0.48% profit per trade) ← DEFAULT
 #
-#  Delivery (CNC) fee breakdown — GROWW only (round-trip ~0.21%  ← cheaper!):
+#  Delivery (CNC) fee breakdown — GROWW only (cheaper!):
 #    Brokerage ZERO ✅ + STT 0.1% BOTH sides + NSE + GST + SEBI + Stamp
-#    → Set scout_margin >= 0.5  (leaves ~0.29% profit per trade)
+#    Round-trip ≈ 0.21%
+#    → Set scout_margin >= 0.5 if using Groww
 #
-scout_margin = 0.3
+#  Intraday (MIS) fee breakdown — ALL brokers (if you switch to intraday):
+#    Brokerage ₹20/order + STT 0.025% sell + NSE 0.007% + GST + SEBI + Stamp
+#    Round-trip ≈ 0.13%
+#    → Set scout_margin >= 0.3 for intraday
+#
+scout_margin = 0.8
 
 # use_margin: yes = scout_margin acts as direct % threshold (recommended)
 #             no  = multiplier mode (advanced)

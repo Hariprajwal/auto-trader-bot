@@ -11,7 +11,10 @@ Run:
 
 Or with custom params:
     python -m auto_trade_bot backtest --start 2024-01-01 --end 2024-12-31 \\
-        --capital 100000 --scout-margin 0.5 --stocks RELIANCE,TCS,INFY
+        --capital 100000 --scout-margin 0.8 --stocks RELIANCE,TCS,INFY
+
+Default mode: DELIVERY (hold indefinitely, swap when ratio improves)
+For intraday simulation: --scout-margin 0.3 --fee 0.00065
 """
 
 import argparse
@@ -179,9 +182,9 @@ def run_simulation(
     price_df: pd.DataFrame,
     symbols: List[str],
     initial_capital: float = 100000.0,
-    scout_margin: float = 0.5,
+    scout_margin: float = 0.8,   # delivery default (round-trip ~0.32%)
     scout_multiplier: float = 5.0,
-    fee_pct: float = 0.0005,
+    fee_pct: float = 0.00158,    # delivery fee per side (~0.158%)
     use_margin: bool = True,
     initial_stock: str = None,
 ) -> BacktestResult:
@@ -407,12 +410,12 @@ def run_backtest():
                         help="NSE or BSE (default: NSE)")
     parser.add_argument("--interval", type=str, default="1d",
                         help="Data interval: 1d (daily), 1h (hourly), 5m (5-min, max 60 days). Default: 1d")
-    parser.add_argument("--scout-margin", type=float, default=0.5,
-                        help="Scout margin %% (default: 0.5)")
+    parser.add_argument("--scout-margin", type=float, default=0.8,
+                        help="Scout margin %% (default: 0.8 for delivery, use 0.3 for intraday)")
     parser.add_argument("--scout-multiplier", type=float, default=5.0,
                         help="Scout multiplier (default: 5.0)")
-    parser.add_argument("--fee", type=float, default=0.0005,
-                        help="Fee per trade as decimal (default: 0.0005 = 0.05%%)")
+    parser.add_argument("--fee", type=float, default=0.00158,
+                        help="Fee per side as decimal (default: 0.00158 = 0.158%% delivery. Use 0.00065 for intraday)")
     parser.add_argument("--no-margin", action="store_true",
                         help="Use simple ratio mode (no margin mode)")
     parser.add_argument("--initial-stock", type=str, default=None,
@@ -453,8 +456,8 @@ def run_backtest():
     print(f"  Interval     : {args.interval}")
     print(f"  Capital      : ₹{args.capital:,.0f}")
     print(f"  Exchange     : {args.exchange}")
-    print(f"  Scout margin : {args.scout_margin}%")
-    print(f"  Fee/side     : {args.fee*100:.3f}%")
+    print(f"  Scout margin : {args.scout_margin}%  ({'delivery' if args.scout_margin >= 0.5 else 'intraday'} mode)")
+    print(f"  Fee/side     : {args.fee*100:.4f}%")
 
     # --- Download data ---
     raw_data = fetch_historical_data(

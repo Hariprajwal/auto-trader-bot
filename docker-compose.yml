@@ -26,8 +26,8 @@ services:
       # - BROKER_PASSWORD=your_password
       # - BROKER_TOTP_SECRET=your_totp_secret
       # - EXCHANGE=NSE
-      # - TRADE_TYPE=INTRADAY
-      # - SCOUT_MARGIN=0.3
+      # - TRADE_TYPE=DELIVERY     # ← default: hold indefinitely, swap when ratio improves
+      # - SCOUT_MARGIN=0.8        # ← 0.8 for delivery, 0.5 for Groww, 0.3 for intraday
 
     # ── Logging ──────────────────────────────────────────────────────────────
     logging:
@@ -51,7 +51,7 @@ services:
         --start 2024-01-01
         --end   2024-12-31
         --capital 100000
-        --scout-margin 0.3
+        --scout-margin 0.8
         --save
 
 volumes:

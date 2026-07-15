@@ -40,12 +40,16 @@ class Config:
         config["DEFAULT"] = {
             "broker": "angel_one",
             "exchange": "NSE",
-            "trade_type": "intraday",
+            # delivery = hold indefinitely, swap only when ratio improves enough
+            # intraday = must square off by market close (3:20 PM IST)
+            "trade_type": "delivery",
             "bridge": "INR",
             "use_margin": "yes",
             "scout_multiplier": "5",
-            # 0.3 for intraday (round-trip fee ~0.13%), 0.8 for delivery (round-trip fee ~0.32%)
-            "scout_margin": "0.3",
+            # 0.8 for delivery (round-trip fee ~0.32%) ← DEFAULT
+            # 0.3 for intraday (round-trip fee ~0.13%)
+            # NOTE: Groww delivery is cheaper (~0.21%) → use 0.5 with Groww
+            "scout_margin": "0.8",
             "scout_sleep_time": "10",
             "hour_to_keep_scout_history": "1",
             "strategy": "default",
