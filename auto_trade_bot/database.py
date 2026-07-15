@@ -160,18 +160,18 @@ class TradeLog:
             session.add(self.trade)
             session.flush()
 
-    def set_ordered(self, alt_starting_balance, inr_starting_balance, alt_trade_amount):
+    def set_ordered(self, shares_starting, inr_starting_balance, shares_traded):
         with self.db.db_session() as session:
             trade = session.merge(self.trade)
-            trade.alt_starting_balance = alt_starting_balance
-            trade.alt_trade_amount = alt_trade_amount
-            trade.crypto_starting_balance = inr_starting_balance
+            trade.alt_starting_balance = shares_starting      # shares held before trade
+            trade.alt_trade_amount = shares_traded             # shares actually sold/bought
+            trade.crypto_starting_balance = inr_starting_balance  # INR before trade
             trade.state = TradeState.ORDERED
 
     def set_complete(self, inr_trade_amount):
         with self.db.db_session() as session:
             trade = session.merge(self.trade)
-            trade.crypto_trade_amount = inr_trade_amount
+            trade.crypto_trade_amount = inr_trade_amount  # Total INR value exchanged
             trade.state = TradeState.COMPLETE
 
     def set_failed(self):

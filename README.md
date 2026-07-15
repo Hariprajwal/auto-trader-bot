@@ -53,8 +53,9 @@ The strategy exploits **relative momentum**: if `RELIANCE` has moved up 1% while
 
 | Feature | Description |
 |---|---|
-| 🏦 **5 Broker Support** | Angel One, Zerodha, Upstox, Dhan, Fyers — switch with one config line |
+| 🏦 **6 Broker Support** | Angel One, Zerodha, Upstox, Dhan, Fyers, Groww — switch with one config line |
 | 📊 **Real-time Ratio Scouting** | Live price comparison across all your stocks every 10 seconds |
+| 🔀 **2 Strategies** | Default (1 stock) or Multiple Stocks (hold N, rotate worst) |
 | 🕐 **Market Hours Guard** | Bot automatically idles outside 9:15 AM – 3:30 PM IST and on weekends |
 | ⚡ **Circuit Breaker Detection** | Skips stocks at upper/lower circuit limits automatically |
 | 🧮 **Precise Fee Calculation** | Uses real Indian brokerage breakdown (STT, GST, exchange charges, stamp duty) |
@@ -214,8 +215,14 @@ Always backtest before going live:
 python -m auto_trade_bot backtest
 ```
 
-### 5. Start the bot
+### 5. Start the bot (Windows)
 
+**Option A — One-click batch file:**
+```bat
+run.bat
+```
+
+**Option B — Manual:**
 ```bash
 python -m auto_trade_bot
 ```
@@ -272,7 +279,7 @@ All settings go in `user.cfg` under `[auto_trade_bot_config]`.
 
 | Key | Description |
 |---|---|
-| `broker` | `angel_one` / `zerodha` / `upstox` / `dhan` / `fyers` |
+| `broker` | `angel_one` / `zerodha` / `upstox` / `dhan` / `fyers` / `groww` |
 | `api_key` | Your broker API key |
 | `client_id` | Client/user ID (Angel One, Dhan, Fyers) |
 | `password` | Login password (Angel One) |
@@ -306,7 +313,8 @@ All settings go in `user.cfg` under `[auto_trade_bot_config]`.
 | Key | Default | Description |
 |---|---|---|
 | `current_stock` | *(empty)* | Stock to hold when bot starts. Leave empty to pick randomly |
-| `strategy` | `default` | Trading strategy. Currently: `default` |
+| `strategy` | `default` | `default` (hold 1 stock) or `multiple_stocks` (hold N, rotate worst) |
+| `portfolio_size` | `3` | Number of stocks to hold simultaneously *(only for `multiple_stocks` strategy)* |
 
 ---
 
@@ -409,40 +417,43 @@ Loss too large to carry ──► Cut loss, square off now 🛑
 auto-trader-bot/
 │
 ├── auto_trade_bot/
-│   ├── __main__.py              ← Entry point
+│   ├── __main__.py              ← Entry point (live or backtest)
 │   ├── stock_trading.py         ← Main orchestrator
 │   ├── auto_trader.py           ← Core ratio engine + market logic
-│   ├── backtest.py              ← Backtesting engine
+│   ├── backtest.py              ← Backtesting engine (yfinance)
 │   ├── config.py                ← Config reader (user.cfg / env vars)
 │   ├── database.py              ← SQLite persistence layer
-│   ├── logger.py                ← Dual file+console logger
+│   ├── logger.py                ← Dual file+console logger with startup banner
 │   ├── scheduler.py             ← Safe scheduler (won't crash on job errors)
 │   │
 │   ├── brokers/
 │   │   ├── base_broker.py       ← Abstract interface all brokers implement
-│   │   ├── angel_one_broker.py  ← Angel One SmartAPI
+│   │   ├── angel_one_broker.py  ← Angel One SmartAPI (recommended)
 │   │   ├── zerodha_broker.py    ← Zerodha Kite
 │   │   ├── upstox_broker.py     ← Upstox v2
 │   │   ├── dhan_broker.py       ← Dhan
-│   │   └── fyers_broker.py      ← Fyers
+│   │   ├── fyers_broker.py      ← Fyers
+│   │   └── groww_broker.py      ← Groww Pro (zero delivery brokerage!)
 │   │
 │   ├── models/
 │   │   ├── stock.py             ← Stock entity
 │   │   ├── pair.py              ← Stock pair with stored ratio
-│   │   ├── trade.py             ← Trade record
-│   │   ├── current_stock.py     ← Currently held stock
+│   │   ├── trade.py             ← Trade record with full state
+│   │   ├── current_stock.py     ← Currently held stock tracker
 │   │   ├── stock_value.py       ← Portfolio value snapshots
-│   │   └── scout_history.py     ← Ratio scout log
+│   │   └── scout_history.py     ← Ratio scout log (for analysis)
 │   │
 │   └── strategies/
-│       └── default_strategy.py  ← Default ratio rotation strategy
+│       ├── default_strategy.py        ← Hold 1 stock, rotate when ratio improves
+│       └── multiple_stocks_strategy.py ← Hold N stocks, rotate the weakest one
 │
 ├── supported_stock_list          ← One NSE symbol per line
 ├── user.cfg.example              ← Config template (copy → user.cfg)
-├── Dockerfile                    ← Docker build
-├── docker-compose.yml            ← Docker Compose (live + backtest)
+├── run.bat                       ← Windows one-click startup script
+├── Dockerfile                    ← Docker build file
+├── docker-compose.yml            ← Docker Compose (live + backtest profiles)
 ├── requirements.txt
-├── LICENSE                       ← MIT License
+├── LICENSE                       ← MIT License — K R HARI PRAJWAL
 └── README.md
 ```
 
@@ -468,6 +479,10 @@ auto-trader-bot/
 **Q: What's the difference between `use_margin = yes` and `no`?**
 > - `yes` (margin mode): A trade is triggered when the ratio score exceeds `scout_margin` as a direct percentage. More intuitive.
 > - `no` (multiplier mode): Uses `scout_multiplier` to scale the ratio threshold. Advanced — not recommended unless you know what you're doing.
+
+**Q: What's the difference between `default` and `multiple_stocks` strategies?**
+> - `default`: Bot holds ONE stock at a time. Entire capital is in one stock. Simple and aggressive.
+> - `multiple_stocks`: Bot holds N stocks simultaneously (set `portfolio_size`). Rotates only the weakest one. More diversified, lower risk, but gains are spread across multiple positions.
 
 ---
 
